@@ -5,7 +5,7 @@ export interface Carta {
   encontrada: boolean;
 }
 
-interface InfoCarta {
+export interface InfoCarta {
   idFoto: number;
   imagen: string;
 }
@@ -38,31 +38,12 @@ export const infoCartas: InfoCarta[] = [
   },
 ];
 
-const crearCartaInicial = (idFoto: number, imagen: string): Carta => ({
+export const crearCartaInicial = (idFoto: number, imagen: string): Carta => ({
   idFoto,
   imagen,
   estaVuelta: false,
   encontrada: false,
 });
-
-export const crearColeccionDeCartasInicial = (
-  infoCartas: InfoCarta[]
-): Carta[] => {
-  const coleccionCartasOriginal = infoCartas.map((carta) =>
-    crearCartaInicial(carta.idFoto, carta.imagen)
-  );
-  const copiaColeccionCartas = coleccionCartasOriginal.map((carta) => ({
-    ...carta,
-    idFoto: carta.idFoto + coleccionCartasOriginal.length,
-  }));
-
-  const coleccionCartasFinal = [
-    ...coleccionCartasOriginal,
-    ...copiaColeccionCartas,
-  ];
-
-  return coleccionCartasFinal;
-};
 
 type EstadoPartida =
   | "PartidaNoIniciada"
@@ -78,28 +59,3 @@ export interface Tablero {
   indiceCartaVolteadaB?: number;
   intentos: number;
 }
-
-export const crearTableroInicial = (): Tablero => {
-  return {
-    cartas: crearColeccionDeCartasInicial(infoCartas),
-    estadoPartida: "PartidaNoIniciada",
-    indiceCartaVolteadaA: -1,
-    indiceCartaVolteadaB: -1,
-    intentos: 0,
-  };
-};
-
-export let tablero: Tablero = crearTableroInicial();
-
-export const finalizarPartida = (tablero: Tablero): void => {
-  tablero.estadoPartida = "PartidaCompleta";
-
-  const mensaje = document.createElement("div");
-  mensaje.innerText = `¡Felicidades! La partida fue completada en ${tablero.intentos} intentos`;
-  mensaje.classList.add("mensaje-completo");
-
-  const contenedor = document.getElementById("app");
-  if (contenedor && contenedor instanceof HTMLElement) {
-    contenedor.appendChild(mensaje);
-  }
-};

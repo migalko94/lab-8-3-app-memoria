@@ -40,3 +40,5 @@ Definimos el botón para empezar partida y le asignamos la función correspondie
 Lo hemos dejado limpio para que sólo haya que importar _shell_.
 
 > Fin de la implementación
+
+**Se realizan cambios en base a las correcciones propuestas**

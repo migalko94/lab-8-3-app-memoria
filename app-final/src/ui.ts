@@ -1,112 +1,138 @@
-import { Carta, Tablero, crearTableroInicial, finalizarPartida } from "./model";
+import { Tablero } from "./model";
+import { esPartidaCompleta, esPartidaNoIniciada, tablero } from "./motor";
 import {
   sePuedeVoltearLaCarta,
   voltearLaCarta,
   sonPareja,
-  parejaNoEncontrada,
+  marcarCartasNoEncontradas,
+  esGanada,
   parejaEncontrada,
   barajarCartas,
-  encontrarCartaPorId,
+  encontrarCartaPorPosicionArray,
+  resetearIntentos,
+  reinicioVolteo,
+  obtenerIndiceCarta,
+  reiniciarCartas,
 } from "./motor";
 
 const reiniciarDisplayCarta = (indice: number): void => {
-  const divCarta = document.getElementById(`carta-${indice}`);
-  if (divCarta && divCarta instanceof HTMLElement) {
-    divCarta.innerHTML = "";
+  const divCarta = document.getElementById(`tablero-elemento-${indice}`);
+  const imagen = document.querySelector(`img[data-imagen="${indice}"]`);
+  if (
+    divCarta &&
+    divCarta instanceof HTMLElement &&
+    imagen &&
+    imagen instanceof HTMLImageElement
+  ) {
+    imagen.src = ".";
     divCarta.removeAttribute("style");
   }
 };
 
-const crearDivCarta = (indice: number): HTMLElement => {
-  const divCarta = document.createElement("div");
-  divCarta.classList.add("tablero-elemento");
-  divCarta.id = `carta-${indice}`;
-  return divCarta;
-};
+export const reiniciarDisplayTablero = (): void => {
+  for (let indice = 0; indice < tablero.cartas.length; indice++) {
+    const divCarta = document.getElementById(`tablero-elemento-${indice}`);
+    const imagen = document.querySelector(`img[data-imagen="${indice}"]`);
 
-export const reiniciarDisplayTablero = (tablero: Tablero): void => {
-  const tableroContenedor = document.getElementById("tablero");
-  if (tableroContenedor && tableroContenedor instanceof HTMLElement) {
-    tableroContenedor.innerHTML = "";
-    tablero.cartas.forEach((carta) => {
-      const indice = carta.idFoto;
-      const divCarta = crearDivCarta(indice);
-      tableroContenedor.appendChild(divCarta);
-    });
-  }
-
-  tablero.estadoPartida = "PartidaNoIniciada";
-};
-
-const pintarCarta = (tablero: Tablero, indice: number): void => {
-  const cartaAVoltear = encontrarCartaPorId(tablero, indice);
-  if (cartaAVoltear) {
-    const divCarta = document.getElementById(`carta-${indice}`);
-    if (divCarta && divCarta instanceof HTMLElement) {
-      const imagen = document.createElement("img");
-      imagen.id = `imagen-${indice}`;
-      imagen.src = cartaAVoltear.imagen;
-      divCarta.appendChild(imagen);
-      divCarta.style.backgroundColor = "plum";
+    if (
+      divCarta &&
+      divCarta instanceof HTMLElement &&
+      imagen &&
+      imagen instanceof HTMLImageElement
+    ) {
+      imagen.src = ".";
+      divCarta.removeAttribute("style");
     }
   }
 };
 
-const gestionarEmparejamiento = (
+const pintarImagen = (
   tablero: Tablero,
-  cartasLevantadas: Carta[]
-): void => {
+  indice: number,
+  imagen: HTMLImageElement
+) => {
+  const cartaAVoltear = encontrarCartaPorPosicionArray(tablero, indice);
+  if (cartaAVoltear) {
+    imagen.src = cartaAVoltear.imagen;
+  }
+};
+
+const pintarCarta = (tablero: Tablero, indice: number): void => {
+  const divCarta = document.getElementById(`tablero-elemento-${indice}`);
+  const imagen = document.querySelector(`img[data-imagen="${indice}"]`);
+  if (divCarta && divCarta instanceof HTMLElement) {
+    if (imagen && imagen instanceof HTMLImageElement) {
+      pintarImagen(tablero, indice, imagen);
+    }
+
+    divCarta.style.backgroundColor = "plum";
+  }
+};
+
+const gestionarEmparejamiento = (tablero: Tablero) => {
+  const cartasLevantadas = obtenerCartasLevantadas(tablero);
+
   if (cartasLevantadas.length === 2) {
-    tablero.estadoPartida = "DosCartasLevantadas";
     const cartaA = cartasLevantadas[0];
     const cartaB = cartasLevantadas[1];
+    const indiceA = obtenerIndiceCarta(tablero, cartaA);
+    const indiceB = obtenerIndiceCarta(tablero, cartaB);
 
-    if (sonPareja(cartaA.idFoto, cartaB.idFoto, tablero)) {
-      parejaEncontrada(tablero, cartaA.idFoto, cartaB.idFoto);
+    if (sonPareja(indiceA, indiceB, tablero)) {
+      parejaEncontrada(tablero, indiceA, indiceB);
+      esGanada(tablero);
+      finalizarPartida(tablero);
     } else {
       setTimeout(() => {
-        parejaNoEncontrada(tablero, cartaA.idFoto, cartaB.idFoto);
-        reiniciarDisplayCarta(cartaA.idFoto);
-        reiniciarDisplayCarta(cartaB.idFoto);
+        gestionarParejaNoEncontrada(tablero);
       }, 500);
     }
   }
 };
 
-export const clickDivCarta = (tablero: Tablero) => {
-  tablero.cartas.forEach((carta) => {
-    const indice = carta.idFoto;
-    const divCarta = document.getElementById(`carta-${indice}`);
-
-    if (divCarta && divCarta instanceof HTMLElement) {
-      const imagen = document.createElement("img");
-      imagen.id = `imagen-${indice}`;
-      divCarta.appendChild(imagen);
-
-      divCarta.addEventListener("click", () => {
-        if (sePuedeVoltearLaCarta(tablero, indice)) {
-          voltearLaCarta(tablero, indice);
-          pintarCarta(tablero, indice);
-          tablero.estadoPartida = "UnaCartaLevantada";
-
-          const cartasLevantadas = tablero.cartas.filter(
-            (carta) => carta.estaVuelta && !carta.encontrada
-          );
-
-          gestionarEmparejamiento(tablero, cartasLevantadas);
-        }
-      });
-    }
-  });
+const obtenerCartasLevantadas = (tablero: Tablero) => {
+  return tablero.cartas.filter(
+    (carta) => carta.estaVuelta && !carta.encontrada
+  );
 };
 
-export const pintaMensajeFinPartida = (tablero: Tablero): void => {
-  if (tablero.estadoPartida === "PartidaCompleta") {
-    finalizarPartida(tablero);
+const gestionarParejaNoEncontrada = (tablero: Tablero) => {
+  const cartasLevantadas = obtenerCartasLevantadas(tablero);
+
+  if (cartasLevantadas.length === 2) {
+    const cartaA = cartasLevantadas[0];
+    const cartaB = cartasLevantadas[1];
+    const indiceA = obtenerIndiceCarta(tablero, cartaA);
+    const indiceB = obtenerIndiceCarta(tablero, cartaB);
+    marcarCartasNoEncontradas(tablero, indiceA, indiceB);
+
+    reinicioVolteo(tablero);
+
+    reiniciarDisplayCarta(indiceA);
+    reiniciarDisplayCarta(indiceB);
   }
 };
 
-export const empezarPartida = (tablero: Tablero): void => {
+export const clickDivCarta = (tablero: Tablero) => {
+  for (let indice = 0; indice < tablero.cartas.length; indice++) {
+    const divCarta = document.getElementById(`tablero-elemento-${indice}`);
+
+    if (divCarta && divCarta instanceof HTMLElement) {
+      divCarta.addEventListener("click", () => generarEventListener(indice));
+    }
+  }
+};
+
+const generarEventListener = (indice: number) => {
+  if (sePuedeVoltearLaCarta(tablero, indice)) {
+    voltearLaCarta(tablero, indice);
+    pintarCarta(tablero, indice);
+
+    gestionarEmparejamiento(tablero);
+  }
+};
+
+const eliminaMensaje = () => {
   const contenedor = document.getElementById("app");
   if (contenedor && contenedor instanceof HTMLElement) {
     const mensaje = contenedor.querySelector(".mensaje-completo");
@@ -114,11 +140,47 @@ export const empezarPartida = (tablero: Tablero): void => {
       contenedor.removeChild(mensaje);
     }
   }
-  tablero = crearTableroInicial();
+};
 
-  reiniciarDisplayTablero(tablero);
+export const empezarPartida = (tablero: Tablero): void => {
+  if (tablero.estadoPartida === "PartidaCompleta") {
+    reiniciarPartida(tablero);
+  }
+  clickDivCarta(tablero);
+};
+
+export const cargarJuego = (tablero: Tablero): void => {
+  barajarCartas(tablero);
+};
+
+const reiniciarPartida = (tablero: Tablero) => {
+  eliminaMensaje();
+  reiniciarCartas(tablero);
+  resetearIntentos(tablero);
+  reiniciarDisplayTablero();
+  esPartidaNoIniciada(tablero);
+
   barajarCartas(tablero);
   clickDivCarta(tablero);
+};
 
-  pintaMensajeFinPartida(tablero);
+const botonEmpezarPartida = document.getElementById("empezar-partida");
+if (botonEmpezarPartida && botonEmpezarPartida instanceof HTMLButtonElement) {
+  document.addEventListener("DOMContentLoaded", () =>
+    botonEmpezarPartida.addEventListener("click", () => empezarPartida(tablero))
+  );
+}
+document.addEventListener("DOMContentLoaded", () => cargarJuego(tablero));
+
+export const finalizarPartida = (tablero: Tablero): void => {
+  if (esPartidaCompleta(tablero)) {
+    const mensaje = document.createElement("div");
+    mensaje.innerText = `¡Felicidades! La partida fue completada en ${tablero.intentos} intentos`;
+    mensaje.classList.add("mensaje-completo");
+
+    const contenedor = document.getElementById("app");
+    if (contenedor && contenedor instanceof HTMLElement) {
+      contenedor.appendChild(mensaje);
+    }
+  }
 };
