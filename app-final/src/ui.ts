@@ -11,7 +11,6 @@ import {
   encontrarCartaPorPosicionArray,
   resetearIntentos,
   reinicioVolteo,
-  obtenerIndiceCarta,
   reiniciarCartas,
 } from "./motor";
 
@@ -70,14 +69,9 @@ const pintarCarta = (tablero: Tablero, indice: number): void => {
 };
 
 const gestionarEmparejamiento = (tablero: Tablero) => {
-  const cartasLevantadas = obtenerCartasLevantadas(tablero);
-
-  if (cartasLevantadas.length === 2) {
-    const cartaA = cartasLevantadas[0];
-    const cartaB = cartasLevantadas[1];
-    const indiceA = obtenerIndiceCarta(tablero, cartaA);
-    const indiceB = obtenerIndiceCarta(tablero, cartaB);
-
+  const indiceA = tablero.indiceCartaVolteadaA;
+  const indiceB = tablero.indiceCartaVolteadaB;
+  if (indiceA !== undefined && indiceB !== undefined) {
     if (sonPareja(indiceA, indiceB, tablero)) {
       parejaEncontrada(tablero, indiceA, indiceB);
       esGanada(tablero);
@@ -90,17 +84,10 @@ const gestionarEmparejamiento = (tablero: Tablero) => {
   }
 };
 
-const obtenerCartasLevantadas = (tablero: Tablero) =>
-  tablero.cartas.filter((carta) => carta.estaVuelta && !carta.encontrada);
-
 const gestionarParejaNoEncontrada = (tablero: Tablero) => {
-  const cartasLevantadas = obtenerCartasLevantadas(tablero);
-
-  if (cartasLevantadas.length === 2) {
-    const cartaA = cartasLevantadas[0];
-    const cartaB = cartasLevantadas[1];
-    const indiceA = obtenerIndiceCarta(tablero, cartaA);
-    const indiceB = obtenerIndiceCarta(tablero, cartaB);
+  const indiceA = tablero.indiceCartaVolteadaA;
+  const indiceB = tablero.indiceCartaVolteadaB;
+  if (indiceA !== undefined && indiceB !== undefined) {
     marcarCartasNoEncontradas(tablero, indiceA, indiceB);
 
     reinicioVolteo(tablero);

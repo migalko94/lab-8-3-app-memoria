@@ -62,6 +62,12 @@ export const voltearLaCarta = (tablero: Tablero, indice: number): void => {
   if (cartaAVoltear) {
     cartaAVoltear.estaVuelta = true;
     tablero.intentos += 0.5;
+    if (esUnaCartaLevantada(tablero)) {
+      tablero.indiceCartaVolteadaA = indice;
+    }
+    if (sonDosCartasLevantadas(tablero)) {
+      tablero.indiceCartaVolteadaB = indice;
+    }
   }
 };
 
@@ -85,6 +91,11 @@ const marcarCartasEncontradas = (
   });
 };
 
+const restaurarIndicesTablero = (tablero: Tablero) => {
+  tablero.indiceCartaVolteadaA = undefined;
+  tablero.indiceCartaVolteadaB = undefined;
+};
+
 export const marcarCartasNoEncontradas = (
   tablero: Tablero,
   indiceA: number,
@@ -97,6 +108,8 @@ export const marcarCartasNoEncontradas = (
     carta.idFoto !== cartaA.idFoto ? (cartaA.encontrada = false) : null;
     carta.idFoto !== cartaB.idFoto ? (cartaB.encontrada = false) : null;
   });
+
+  restaurarIndicesTablero(tablero);
 };
 
 export const parejaEncontrada = (
@@ -106,6 +119,7 @@ export const parejaEncontrada = (
 ): void => {
   reinicioVolteo(tablero);
   marcarCartasEncontradas(tablero, indiceA, indiceB);
+  restaurarIndicesTablero(tablero);
 };
 
 export const esGanada = (tablero: Tablero) =>
@@ -125,6 +139,25 @@ export const esPartidaCompleta = (tablero: Tablero): boolean => {
 
 export const esPartidaNoIniciada = (tablero: Tablero): void => {
   tablero.estadoPartida = "PartidaNoIniciada";
+};
+
+const obtenerCartasLevantadas = (tablero: Tablero) =>
+  tablero.cartas.filter((carta) => carta.estaVuelta && !carta.encontrada);
+
+const esUnaCartaLevantada = (tablero: Tablero): boolean => {
+  const cartasLevantadas = obtenerCartasLevantadas(tablero);
+  if (cartasLevantadas.length === 1) {
+    return true;
+  }
+  return false;
+};
+
+const sonDosCartasLevantadas = (tablero: Tablero): boolean => {
+  const cartasLevantadas = obtenerCartasLevantadas(tablero);
+  if (cartasLevantadas.length === 2) {
+    return true;
+  }
+  return false;
 };
 
 export const reinicioVolteo = (tablero: Tablero): void => {
