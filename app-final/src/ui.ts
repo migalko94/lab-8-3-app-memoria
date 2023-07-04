@@ -85,16 +85,13 @@ const gestionarEmparejamiento = (tablero: Tablero) => {
     } else {
       setTimeout(() => {
         gestionarParejaNoEncontrada(tablero);
-      }, 500);
+      }, 300);
     }
   }
 };
 
-const obtenerCartasLevantadas = (tablero: Tablero) => {
-  return tablero.cartas.filter(
-    (carta) => carta.estaVuelta && !carta.encontrada
-  );
-};
+const obtenerCartasLevantadas = (tablero: Tablero) =>
+  tablero.cartas.filter((carta) => carta.estaVuelta && !carta.encontrada);
 
 const gestionarParejaNoEncontrada = (tablero: Tablero) => {
   const cartasLevantadas = obtenerCartasLevantadas(tablero);
@@ -146,11 +143,11 @@ export const empezarPartida = (tablero: Tablero): void => {
   if (tablero.estadoPartida === "PartidaCompleta") {
     reiniciarPartida(tablero);
   }
-  clickDivCarta(tablero);
 };
 
 export const cargarJuego = (tablero: Tablero): void => {
   barajarCartas(tablero);
+  clickDivCarta(tablero);
 };
 
 const reiniciarPartida = (tablero: Tablero) => {
@@ -161,7 +158,6 @@ const reiniciarPartida = (tablero: Tablero) => {
   esPartidaNoIniciada(tablero);
 
   barajarCartas(tablero);
-  clickDivCarta(tablero);
 };
 
 const botonEmpezarPartida = document.getElementById("empezar-partida");
