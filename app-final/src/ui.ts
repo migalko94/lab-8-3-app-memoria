@@ -4,7 +4,7 @@ import {
   sePuedeVoltearLaCarta,
   voltearLaCarta,
   sonPareja,
-  marcarCartasNoEncontradas,
+  parejaNoEncontrada,
   esGanada,
   parejaEncontrada,
   barajarCartas,
@@ -30,18 +30,7 @@ const reiniciarDisplayCarta = (indice: number): void => {
 
 export const reiniciarDisplayTablero = (): void => {
   for (let indice = 0; indice < tablero.cartas.length; indice++) {
-    const divCarta = document.getElementById(`tablero-elemento-${indice}`);
-    const imagen = document.querySelector(`img[data-imagen="${indice}"]`);
-
-    if (
-      divCarta &&
-      divCarta instanceof HTMLElement &&
-      imagen &&
-      imagen instanceof HTMLImageElement
-    ) {
-      imagen.src = ".";
-      divCarta.removeAttribute("style");
-    }
+    reiniciarDisplayCarta(indice);
   }
 };
 
@@ -63,7 +52,6 @@ const pintarCarta = (tablero: Tablero, indice: number): void => {
     if (imagen && imagen instanceof HTMLImageElement) {
       pintarImagen(tablero, indice, imagen);
     }
-
     divCarta.style.backgroundColor = "plum";
   }
 };
@@ -72,15 +60,13 @@ const gestionarEmparejamiento = (tablero: Tablero) => {
   const indiceA = tablero.indiceCartaVolteadaA;
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
-    if (sonPareja(indiceA, indiceB, tablero)) {
-      parejaEncontrada(tablero, indiceA, indiceB);
-      esGanada(tablero);
-      finalizarPartida(tablero);
-    } else {
-      setTimeout(() => {
-        gestionarParejaNoEncontrada(tablero);
-      }, 300);
-    }
+    sonPareja(indiceA, indiceB, tablero)
+      ? (parejaEncontrada(tablero, indiceA, indiceB),
+        esGanada(tablero),
+        finalizarPartida(tablero))
+      : setTimeout(() => {
+          gestionarParejaNoEncontrada(tablero);
+        }, 300);
   }
 };
 
@@ -88,10 +74,8 @@ const gestionarParejaNoEncontrada = (tablero: Tablero) => {
   const indiceA = tablero.indiceCartaVolteadaA;
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
-    marcarCartasNoEncontradas(tablero, indiceA, indiceB);
-
+    parejaNoEncontrada(tablero, indiceA, indiceB);
     reinicioVolteo(tablero);
-
     reiniciarDisplayCarta(indiceA);
     reiniciarDisplayCarta(indiceB);
   }
@@ -111,7 +95,6 @@ const generarEventListener = (indice: number) => {
   if (sePuedeVoltearLaCarta(tablero, indice)) {
     voltearLaCarta(tablero, indice);
     pintarCarta(tablero, indice);
-
     gestionarEmparejamiento(tablero);
   }
 };
@@ -126,11 +109,10 @@ const eliminaMensaje = () => {
   }
 };
 
-export const empezarPartida = (tablero: Tablero): void => {
-  if (tablero.estadoPartida === "PartidaCompleta") {
-    reiniciarPartida(tablero);
-  }
-};
+export const empezarPartida = (tablero: Tablero) =>
+  tablero.estadoPartida === "PartidaCompleta"
+    ? reiniciarPartida(tablero)
+    : null;
 
 export const cargarJuego = (tablero: Tablero): void => {
   barajarCartas(tablero);
@@ -143,7 +125,6 @@ const reiniciarPartida = (tablero: Tablero) => {
   resetearIntentos(tablero);
   reiniciarDisplayTablero();
   esPartidaNoIniciada(tablero);
-
   barajarCartas(tablero);
 };
 
