@@ -67,13 +67,21 @@ const gestionarEmparejamiento = (tablero: Tablero) => {
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
     sonPareja(indiceA, indiceB, tablero)
-      ? (parejaEncontrada(tablero, indiceA, indiceB),
-        esGanada(tablero),
-        finalizarPartida(tablero))
+      ? gestionarSonPareja(tablero, indiceA, indiceB)
       : setTimeout(() => {
           gestionarParejaNoEncontrada(tablero);
         }, 300);
   }
+};
+
+const gestionarSonPareja = (
+  tablero: Tablero,
+  indiceA: number,
+  indiceB: number
+) => {
+  parejaEncontrada(tablero, indiceA, indiceB),
+    esGanada(tablero),
+    finalizarPartida(tablero);
 };
 
 const gestionarParejaNoEncontrada = (tablero: Tablero) => {
@@ -81,6 +89,7 @@ const gestionarParejaNoEncontrada = (tablero: Tablero) => {
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
     parejaNoEncontrada(tablero, indiceA, indiceB);
+    sonCeroCartasLevantadas(tablero);
     reinicioVolteo(tablero);
     reiniciarDisplayCarta(indiceA);
     reiniciarDisplayCarta(indiceB);
@@ -92,7 +101,11 @@ export const clickDivCarta = (tablero: Tablero) => {
     const divCarta = document.getElementById(`tablero-elemento-${indice}`);
 
     if (divCarta && divCarta instanceof HTMLElement) {
-      divCarta.addEventListener("click", () => generarEventListener(indice));
+      divCarta.addEventListener("click", () => {
+        if (tablero.estadoPartida !== "PartidaNoIniciada") {
+          generarEventListener(indice);
+        }
+      });
     }
   }
 };
@@ -116,19 +129,14 @@ const eliminaMensaje = () => {
 };
 
 export const empezarPartida = (tablero: Tablero) => {
-  tablero.estadoPartida === "PartidaCompleta"
-    ? reiniciarPartida(tablero)
-    : null;
+  reiniciarPartida(tablero);
   sonCeroCartasLevantadas(tablero);
-  cargarJuego(tablero);
 };
 
 export const cargarJuego = (tablero: Tablero): void => {
   crearTableroInicial();
   barajarCartas(tablero);
-  if (tablero.estadoPartida !== "PartidaNoIniciada") {
-    clickDivCarta(tablero);
-  }
+  clickDivCarta(tablero);
 };
 
 const reiniciarPartida = (tablero: Tablero) => {
@@ -150,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => cargarJuego(tablero));
 
 export const finalizarPartida = (tablero: Tablero): void => {
   if (esPartidaCompleta(tablero)) {
+    tablero.estadoPartida = "PartidaCompleta";
     const mensaje = document.createElement("div");
     mensaje.innerText = `¡Felicidades! La partida fue completada en ${tablero.intentos} intentos`;
     mensaje.classList.add("mensaje-completo");

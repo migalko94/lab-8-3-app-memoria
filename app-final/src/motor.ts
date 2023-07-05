@@ -57,19 +57,34 @@ export const sePuedeVoltearLaCarta = (
 ): boolean =>
   !tablero.cartas[indice].encontrada && !tablero.cartas[indice].estaVuelta;
 
+const esUnaCartaLevantada = (tablero: Tablero): boolean =>
+  tablero.estadoPartida === "CeroCartasLevantadas";
+
+const sonDosCartasLevantadas = (tablero: Tablero): boolean =>
+  tablero.estadoPartida === "UnaCartaLevantada";
+
 export const voltearLaCarta = (tablero: Tablero, indice: number): void => {
   const cartaAVoltear = encontrarCartaPorPosicionArray(tablero, indice);
   if (cartaAVoltear) {
-    cartaAVoltear.estaVuelta = true;
     tablero.intentos += 0.5;
     if (esUnaCartaLevantada(tablero)) {
       tablero.indiceCartaVolteadaA = indice;
+      cambiaAEstadoUnaCarta(tablero);
+      return;
     }
     if (sonDosCartasLevantadas(tablero)) {
       tablero.indiceCartaVolteadaB = indice;
+      cambiaAEstadoDosCartas(tablero);
+      return;
     }
   }
 };
+
+export const cambiaAEstadoUnaCarta = (tablero: Tablero) =>
+  (tablero.estadoPartida = "UnaCartaLevantada");
+
+export const cambiaAEstadoDosCartas = (tablero: Tablero) =>
+  (tablero.estadoPartida = "DosCartasLevantadas");
 
 export const sonPareja = (
   indiceA: number,
@@ -86,8 +101,12 @@ const marcarCartasEncontradas = (
   let cartaB = encontrarCartaPorPosicionArray(tablero, indiceB);
 
   tablero.cartas.map((carta) => {
-    carta.idFoto === cartaA.idFoto ? (cartaA.encontrada = true) : null;
-    carta.idFoto === cartaB.idFoto ? (cartaB.encontrada = true) : null;
+    carta.idFoto === cartaA.idFoto
+      ? ((cartaA.encontrada = true), (cartaA.estaVuelta = true))
+      : carta;
+    carta.idFoto === cartaB.idFoto
+      ? ((cartaB.encontrada = true), (cartaB.estaVuelta = true))
+      : carta;
   });
 };
 
@@ -114,8 +133,8 @@ const marcarCartasNoEncontradas = (
   let cartaB = encontrarCartaPorPosicionArray(tablero, indiceB);
 
   tablero.cartas.map((carta) => {
-    carta.idFoto !== cartaA.idFoto ? (cartaA.encontrada = false) : null;
-    carta.idFoto !== cartaB.idFoto ? (cartaB.encontrada = false) : null;
+    carta.idFoto !== cartaA.idFoto ? (cartaA.encontrada = false) : carta;
+    carta.idFoto !== cartaB.idFoto ? (cartaB.encontrada = false) : carta;
   });
 };
 
@@ -134,34 +153,17 @@ export const esGanada = (tablero: Tablero) =>
     ? "PartidaCompleta"
     : "CeroCartasLevantadas");
 
-export const esPartidaCompleta = (tablero: Tablero): boolean => {
-  const partidaCompletada = tablero.cartas.every(
-    (carta) => carta.encontrada === true
-  );
-  if (partidaCompletada) {
-    tablero.estadoPartida = "PartidaCompleta";
-  }
-  return partidaCompletada;
-};
+export const esPartidaCompleta = (tablero: Tablero): boolean =>
+  tablero.cartas.every((carta) => carta.encontrada === true);
+
+export const declaraPartidaCompleta = (tablero: Tablero) =>
+  (tablero.estadoPartida = "PartidaCompleta");
 
 export const esPartidaNoIniciada = (tablero: Tablero) =>
   (tablero.estadoPartida = "PartidaNoIniciada");
 
 export const sonCeroCartasLevantadas = (tablero: Tablero) =>
   (tablero.estadoPartida = "CeroCartasLevantadas");
-
-const obtenerCartasLevantadas = (tablero: Tablero) =>
-  tablero.cartas.filter((carta) => carta.estaVuelta && !carta.encontrada);
-
-const esUnaCartaLevantada = (tablero: Tablero): boolean => {
-  const cartasLevantadas = obtenerCartasLevantadas(tablero);
-  return cartasLevantadas.length === 1;
-};
-
-const sonDosCartasLevantadas = (tablero: Tablero): boolean => {
-  const cartasLevantadas = obtenerCartasLevantadas(tablero);
-  return cartasLevantadas.length === 2;
-};
 
 export const reinicioVolteo = (tablero: Tablero): void => {
   tablero.cartas.forEach((carta) => {
