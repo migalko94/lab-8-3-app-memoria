@@ -147,6 +147,9 @@ export const esPartidaCompleta = (tablero: Tablero): boolean => {
 export const esPartidaNoIniciada = (tablero: Tablero) =>
   (tablero.estadoPartida = "PartidaNoIniciada");
 
+export const sonCeroCartasLevantadas = (tablero: Tablero) =>
+  (tablero.estadoPartida = "CeroCartasLevantadas");
+
 const obtenerCartasLevantadas = (tablero: Tablero) =>
   tablero.cartas.filter((carta) => carta.estaVuelta && !carta.encontrada);
 

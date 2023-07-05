@@ -1,5 +1,10 @@
 import { Tablero } from "./model";
-import { esPartidaCompleta, esPartidaNoIniciada, tablero } from "./motor";
+import {
+  crearTableroInicial,
+  esPartidaCompleta,
+  esPartidaNoIniciada,
+  tablero,
+} from "./motor";
 import {
   sePuedeVoltearLaCarta,
   voltearLaCarta,
@@ -12,6 +17,7 @@ import {
   resetearIntentos,
   reinicioVolteo,
   reiniciarCartas,
+  sonCeroCartasLevantadas,
 } from "./motor";
 
 const reiniciarDisplayCarta = (indice: number): void => {
@@ -109,14 +115,20 @@ const eliminaMensaje = () => {
   }
 };
 
-export const empezarPartida = (tablero: Tablero) =>
+export const empezarPartida = (tablero: Tablero) => {
   tablero.estadoPartida === "PartidaCompleta"
     ? reiniciarPartida(tablero)
     : null;
+  sonCeroCartasLevantadas(tablero);
+  cargarJuego(tablero);
+};
 
 export const cargarJuego = (tablero: Tablero): void => {
+  crearTableroInicial();
   barajarCartas(tablero);
-  clickDivCarta(tablero);
+  if (tablero.estadoPartida !== "PartidaNoIniciada") {
+    clickDivCarta(tablero);
+  }
 };
 
 const reiniciarPartida = (tablero: Tablero) => {
