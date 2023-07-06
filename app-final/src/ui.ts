@@ -15,7 +15,6 @@ import {
   barajarCartas,
   encontrarCartaPorPosicionArray,
   resetearIntentos,
-  reinicioVolteo,
   reiniciarCartas,
   sonCeroCartasLevantadas,
 } from "./motor";
@@ -62,15 +61,19 @@ const pintarCarta = (tablero: Tablero, indice: number): void => {
   }
 };
 
+const volteaParejaNoEncontrada = (tablero: Tablero) => {
+  setTimeout(() => {
+    gestionarParejaNoEncontrada(tablero);
+  }, 300);
+};
+
 const gestionarEmparejamiento = (tablero: Tablero) => {
   const indiceA = tablero.indiceCartaVolteadaA;
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
     sonPareja(indiceA, indiceB, tablero)
       ? gestionarSonPareja(tablero, indiceA, indiceB)
-      : setTimeout(() => {
-          gestionarParejaNoEncontrada(tablero);
-        }, 300);
+      : volteaParejaNoEncontrada(tablero);
   }
 };
 
@@ -88,9 +91,8 @@ const gestionarParejaNoEncontrada = (tablero: Tablero) => {
   const indiceA = tablero.indiceCartaVolteadaA;
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
-    parejaNoEncontrada(tablero, indiceA, indiceB);
+    parejaNoEncontrada(tablero);
     sonCeroCartasLevantadas(tablero);
-    reinicioVolteo(tablero);
     reiniciarDisplayCarta(indiceA);
     reiniciarDisplayCarta(indiceB);
   }

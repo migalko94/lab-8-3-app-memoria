@@ -70,12 +70,9 @@ export const voltearLaCarta = (tablero: Tablero, indice: number): void => {
     if (esUnaCartaLevantada(tablero)) {
       tablero.indiceCartaVolteadaA = indice;
       cambiaAEstadoUnaCarta(tablero);
-      return;
-    }
-    if (sonDosCartasLevantadas(tablero)) {
+    } else if (sonDosCartasLevantadas(tablero)) {
       tablero.indiceCartaVolteadaB = indice;
       cambiaAEstadoDosCartas(tablero);
-      return;
     }
   }
 };
@@ -101,11 +98,8 @@ const marcarCartasEncontradas = (
   let cartaB = encontrarCartaPorPosicionArray(tablero, indiceB);
 
   tablero.cartas.map((carta) => {
-    carta.idFoto === cartaA.idFoto
-      ? ((cartaA.encontrada = true), (cartaA.estaVuelta = true))
-      : carta;
-    carta.idFoto === cartaB.idFoto
-      ? ((cartaB.encontrada = true), (cartaB.estaVuelta = true))
+    carta.idFoto === cartaA.idFoto || carta.idFoto === cartaB.idFoto
+      ? ((carta.encontrada = true), (carta.estaVuelta = true))
       : carta;
   });
 };
@@ -115,27 +109,8 @@ const restaurarIndicesTablero = (tablero: Tablero) => {
   tablero.indiceCartaVolteadaB = undefined;
 };
 
-export const parejaNoEncontrada = (
-  tablero: Tablero,
-  indiceA: number,
-  indiceB: number
-) => {
-  marcarCartasNoEncontradas(tablero, indiceA, indiceB);
+export const parejaNoEncontrada = (tablero: Tablero) => {
   restaurarIndicesTablero(tablero);
-};
-
-const marcarCartasNoEncontradas = (
-  tablero: Tablero,
-  indiceA: number,
-  indiceB: number
-) => {
-  let cartaA = encontrarCartaPorPosicionArray(tablero, indiceA);
-  let cartaB = encontrarCartaPorPosicionArray(tablero, indiceB);
-
-  tablero.cartas.map((carta) => {
-    carta.idFoto !== cartaA.idFoto ? (cartaA.encontrada = false) : carta;
-    carta.idFoto !== cartaB.idFoto ? (cartaB.encontrada = false) : carta;
-  });
 };
 
 export const parejaEncontrada = (
@@ -143,7 +118,6 @@ export const parejaEncontrada = (
   indiceA: number,
   indiceB: number
 ): void => {
-  reinicioVolteo(tablero);
   marcarCartasEncontradas(tablero, indiceA, indiceB);
   restaurarIndicesTablero(tablero);
 };
@@ -164,12 +138,6 @@ export const esPartidaNoIniciada = (tablero: Tablero) =>
 
 export const sonCeroCartasLevantadas = (tablero: Tablero) =>
   (tablero.estadoPartida = "CeroCartasLevantadas");
-
-export const reinicioVolteo = (tablero: Tablero): void => {
-  tablero.cartas.forEach((carta) => {
-    carta.estaVuelta = false;
-  });
-};
 
 export const resetearIntentos = (tablero: Tablero) => (tablero.intentos = 0);
 
