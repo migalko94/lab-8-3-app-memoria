@@ -104,13 +104,33 @@ const marcarCartasEncontradas = (
   });
 };
 
+const marcarCartasNoEncontradas = (
+  tablero: Tablero,
+  indiceA: number,
+  indiceB: number
+) => {
+  let cartaA = encontrarCartaPorPosicionArray(tablero, indiceA);
+  let cartaB = encontrarCartaPorPosicionArray(tablero, indiceB);
+
+  tablero.cartas.map((carta) => {
+    carta.idFoto === cartaA.idFoto || carta.idFoto === cartaB.idFoto
+      ? ((carta.encontrada = false), (carta.estaVuelta = false))
+      : carta;
+  });
+};
+
 const restaurarIndicesTablero = (tablero: Tablero) => {
   tablero.indiceCartaVolteadaA = undefined;
   tablero.indiceCartaVolteadaB = undefined;
 };
 
-export const parejaNoEncontrada = (tablero: Tablero) => {
+export const parejaNoEncontrada = (
+  tablero: Tablero,
+  indiceA: number,
+  indiceB: number
+) => {
   restaurarIndicesTablero(tablero);
+  marcarCartasNoEncontradas(tablero, indiceA, indiceB);
 };
 
 export const parejaEncontrada = (

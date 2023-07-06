@@ -91,7 +91,7 @@ const gestionarParejaNoEncontrada = (tablero: Tablero) => {
   const indiceA = tablero.indiceCartaVolteadaA;
   const indiceB = tablero.indiceCartaVolteadaB;
   if (indiceA !== undefined && indiceB !== undefined) {
-    parejaNoEncontrada(tablero);
+    parejaNoEncontrada(tablero, indiceA, indiceB);
     sonCeroCartasLevantadas(tablero);
     reiniciarDisplayCarta(indiceA);
     reiniciarDisplayCarta(indiceB);
