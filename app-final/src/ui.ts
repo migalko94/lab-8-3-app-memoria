@@ -82,9 +82,9 @@ const gestionarSonPareja = (
   indiceA: number,
   indiceB: number
 ) => {
-  parejaEncontrada(tablero, indiceA, indiceB),
-    esGanada(tablero),
-    finalizarPartida(tablero);
+  parejaEncontrada(tablero, indiceA, indiceB);
+  esGanada(tablero);
+  finalizarPartida(tablero);
 };
 
 const gestionarParejaNoEncontrada = (tablero: Tablero) => {
